@@ -1,19 +1,46 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>NODY Watcher</title>
+  <style>
+    body { margin:0; padding:48px 24px; font:16px/1.7 system-ui,sans-serif; color:#202326; background:#f0f1f3; }
+    main { max-width:440px; margin:8vh auto; padding:32px; background:white; border-radius:24px; box-shadow:0 8px 28px #20232610; }
+    h1 { font-size:24px; margin:0 0 16px; } p { color:#62686e; }
+    a,button { display:inline-block; padding:10px 16px; border:1px solid #dfe2e6; border-radius:12px; background:white; color:#202326; font:inherit; text-decoration:none; cursor:pointer; }
+  </style>
 </head>
 <body>
-  <h2>Opening NODY Watcher...</h2>
-
+  <main>
+    <h1>NODY Watcher 열기</h1>
+    <p id="status" role="status">실행 허용 창이 나타나면 ‘열기’를 눌러 주세요.</p>
+    <p>앱이 열리면 이 탭은 닫아도 됩니다. 자동 닫기는 브라우저 설정에 따라 제한될 수 있습니다.</p>
+    <a id="retry" href="nody://watcher">다시 실행</a>
+    <button id="close" type="button">탭 닫기</button>
+  </main>
   <script>
-    window.location.href = "nody://watcher";
+    let requested = false;
+    let closeTimer;
+    const status = document.getElementById('status');
+    function closeTab() {
+      window.close();
+      status.textContent = '탭이 닫히지 않으면 브라우저의 × 버튼으로 닫아 주세요.';
+    }
+    // Keep the page available while the protocol permission prompt is visible.
+    // Becoming hidden is only a hint of switching apps, not proof of launch.
+    document.addEventListener('visibilitychange', () => {
+      clearTimeout(closeTimer);
+      if (requested && document.visibilityState === 'hidden') {
+        closeTimer = setTimeout(() => {
+          if (document.visibilityState === 'hidden') closeTab();
+        }, 800);
+      }
+    });
+    document.getElementById('close').addEventListener('click', closeTab);
+    document.getElementById('retry').addEventListener('click', () => { requested = true; });
+    requested = true;
+    window.location.href = 'nody://watcher';
   </script>
-
-  <p>
-    If NODY Watcher does not open,
-    <a href="nody://watcher">click here</a>.
-  </p>
 </body>
 </html>
